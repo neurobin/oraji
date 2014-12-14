@@ -3,13 +3,15 @@ cd $(dirname $0)
 #if [ whoami != root ]; then
 #echo -e "\n*********you need to run this with root privilege*********\n*******************Sorry! Exiting*************************\n"
 #exit
-#fi 
+#fi
+jdkgenre="jdk1"
 sudo echo -e "\n***************Starting****************"
 read -e -p "Enter the jdk version: " jdkver
 sudo -u $USER tar -xvf jdk-$jdkver*
-jdkname=jdk1.$jdkver
-sudo mkdir -p /usr/lib/jvm
-sudo mv -f ./$jdkname* /usr/lib/jvm/$jdkname
+jdkname=$jdkgenre.$jdkver
+sudo mkdir -p /usr/lib/jvm/$jdkname
+cd $jdkgenre.*
+sudo mv -f ./* /usr/lib/jvm/$jdkname
 sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/$jdkname/bin/java" 1111
 sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/$jdkname/bin/javac" 1111
 sudo update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/$jdkname/bin/javaws" 1111
@@ -22,4 +24,7 @@ sudo chmod a+x /usr/bin/javaws
 sudo chown -R root:root /usr/lib/jvm/$jdkname
 sudo -u $USER mkdir -p ~/.mozilla/plugins
 sudo ln -sf /usr/lib/jvm/$jdkname/jre/lib/amd64/libnpjp2.so ~/.mozilla/plugins/
+echo -e "\n***************Installaion Finished***************\n***************Showing Java version information***************\n"
+java -version
+echo -e "\n***************See if everything is OK***************"
 #sudo /etc/init.d/apparmor restart
