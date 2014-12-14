@@ -11,3 +11,8 @@ Installation Instruction:
 3. now run the script installJDKOracle in terminal.
 4. It will ask for version number. Give the version number. (Example: 8 or 8u25, must match with the archive)
 5. check java version after installation finished with command : java -version 
+
+
+Tested OS:
+----------
+1. Xubuntu 14.04 LTS
