@@ -5,13 +5,13 @@ cd "$BASEDIR"
 #echo -e "\n*********you need to run this with root privilege*********\n*******************Sorry! Exiting*************************\n"
 #exit
 #fi
-jdkgenre="jdk1"
+jdkgenre="jdk"
 sudo echo -e "\n***************Starting****************"
 read -e -p "Enter the jdk version: " jdkver
-sudo -u $USER tar -xvf jdk-$jdkver*
-jdkname=$jdkgenre.$jdkver
+sudo -u $USER tar -xvf jdk*$jdkver*.tar* || exit 1
+cd $jdkgenre* || exit 1
+jdkname=${PWD##*/}
 sudo mkdir -p /usr/lib/jvm/$jdkname
-cd $jdkgenre.*
 sudo mv -f ./* /usr/lib/jvm/$jdkname
 sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/$jdkname/bin/java" 1111
 sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/$jdkname/bin/javac" 1111
