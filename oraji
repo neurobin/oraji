@@ -25,6 +25,8 @@ sudo chmod a+x /usr/bin/javaws
 sudo chown -R root:root /usr/lib/jvm/$jdkname
 sudo -u $USER mkdir -p ~/.mozilla/plugins
 sudo ln -sf /usr/lib/jvm/$jdkname/jre/lib/amd64/libnpjp2.so ~/.mozilla/plugins/
+cd ..
+rm -r $jdkname
 echo -e "\n***************Installaion Finished***************\n***************Showing Java version information***************\n"
 java -version
 echo -e "\n***************See if everything is OK***************"
