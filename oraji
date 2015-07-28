@@ -2,14 +2,6 @@
 BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
 
-#if [ $EUID -ne 0 ]; then
-#printf "%s\n" "
-#*********This script should be run with root privilege*********
-#**********************Sorry! Exiting***************************
-#"
-#exit 1
-#fi
-
 jdkver="$1"
 [[ $jdkver == "" ]] && read -e -p "Enter the jdk version: " jdkver
 export jdkver

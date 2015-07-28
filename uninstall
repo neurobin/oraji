@@ -1,13 +1,7 @@
 #!/bin/bash
 BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
-#if [ $EUID -ne 0 ]; then
-#printf "%s\n" "
-#*********This script should be run with root privilege*********
-#**********************Sorry! Exiting***************************
-#"
-#exit 1
-#fi
+
 jdkgenre="jdk"
 jdkver="$1"
 [[ $jdkver == "" ]] && 
