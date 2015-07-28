@@ -1,5 +1,5 @@
 #!/bin/bash
-BASEDIR=$(dirname "$BASH_SOURCE")
+BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
 #if [ $EUID -ne 0 ]; then
 #printf "%s\n" "
