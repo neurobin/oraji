@@ -27,4 +27,4 @@ Uininstallation Instruction:
 
 Note that the version number points to the jdk install directory: `/usr/lib/jvm/jdk<version_number>`
 
-###N.B: The uninstaller is only for the oracle java installed with the `oraji` script.
+####N.B: The uninstaller is only for the oracle java installed with the `oraji` script.
