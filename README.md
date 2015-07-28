@@ -14,7 +14,6 @@ Installation Instruction:
 
 4. It will ask for version number. Give the version number. (Example: 8 or 8u25, must match with the archive)
 
-5. You can provide the version number as command line argument too, i.e `/path/to/the/oraji version_number`. For example: `./oraji 8u25`
 
 Uininstall:
 ===========

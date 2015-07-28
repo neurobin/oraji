@@ -1,66 +1,35 @@
 #!/bin/bash
 BASEDIR=$(dirname "$BASH_SOURCE")
 cd "$BASEDIR"
-
-#if [ $EUID -ne 0 ]; then
-#printf "%s\n" "
-#*********This script should be run with root privilege*********
-#**********************Sorry! Exiting***************************
-#"
-#exit 1
+#if [ whoami != root ]; then
+#echo -e "\n*********you need to run this with root privilege*********\n*******************Sorry! Exiting*************************\n"
+#exit
 #fi
-
-jdkver="$1"
-[[ $jdkver == "" ]] && read -e -p "Enter the jdk version: " jdkver
-export jdkver
-
-#Using sudo without -k flag inside script is a security risk unless you have already checked for root privilege.
-#The first sudo inside a script should be used with -k flag.
-sudo -kEs <<\EOF
-
 jdkgenre="jdk"
+sudo echo -e "\n***************Starting****************"
+read -e -p "Enter the jdk version: " jdkver
 tmpdir=__ORAJI__$RANDOM
-
-sudo -u $SUDO_USER mkdir /tmp/$tmpdir
-sudo -u $SUDO_USER tar -xvf jdk*$jdkver*.tar* -C /tmp/$tmpdir || exit 2
-
-cd /tmp/$tmpdir/$jdkgenre* || exit 3
+sudo -u $USER mkdir /tmp/$tmpdir
+sudo -u $USER tar -xvf jdk*$jdkver*.tar* -C /tmp/$tmpdir|| exit 1
+cd /tmp/$tmpdir/$jdkgenre* || exit 1
 jdkname=${PWD##*/}
-
-[[ $jdkname != "" && $tmpdir != "" && $jdkgenre != "" && $jdkver != "" ]] || 
-{ echo "-----Variable can not be empty-----"; exit 4; }
-
-mkdir -p /usr/lib/jvm/$jdkname
-mv -f ./* /usr/lib/jvm/$jdkname
-
-update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/$jdkname/bin/java" 1111
-update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/$jdkname/bin/javac" 1111
-update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/$jdkname/bin/javaws" 1111
-update-alternatives --set java /usr/lib/jvm/$jdkname/bin/java
-update-alternatives --set javac /usr/lib/jvm/$jdkname/bin/javac
-update-alternatives --set javaws /usr/lib/jvm/$jdkname/bin/javaws
-
-chmod a+x /usr/bin/java
-chmod a+x /usr/bin/javac
-chmod a+x /usr/bin/javaws
-chown -R root:root /usr/lib/jvm/$jdkname
-
-#The following two lines is optional (needed for mozilla firefox)
-sudo -u $SUDO_USER mkdir -p ~/.mozilla/plugins
-ln -sf /usr/lib/jvm/$jdkname/jre/lib/amd64/libnpjp2.so ~/.mozilla/plugins/
-#The above two lines is optional (needed for mozilla firefox)
-
-[[ $tmpdir != "" ]] && sudo -u $SUDO_USER rm -rf /tmp/$tmpdir
-
-printf "%s\n" "
-***************Installaion Finished***************
-***************Showing Java version information***************
-"
+sudo mkdir -p /usr/lib/jvm/$jdkname
+sudo mv -f ./* /usr/lib/jvm/$jdkname
+sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/$jdkname/bin/java" 1111
+sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/$jdkname/bin/javac" 1111
+sudo update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/$jdkname/bin/javaws" 1111
+sudo update-alternatives --set java /usr/lib/jvm/$jdkname/bin/java
+sudo update-alternatives --set javac /usr/lib/jvm/$jdkname/bin/javac
+sudo update-alternatives --set javaws /usr/lib/jvm/$jdkname/bin/javaws
+sudo chmod a+x /usr/bin/java
+sudo chmod a+x /usr/bin/javac
+sudo chmod a+x /usr/bin/javaws
+sudo chown -R root:root /usr/lib/jvm/$jdkname
+sudo -u $USER mkdir -p ~/.mozilla/plugins
+sudo ln -sf /usr/lib/jvm/$jdkname/jre/lib/amd64/libnpjp2.so ~/.mozilla/plugins/
+cd $HOME
+rm -rf /tmp/$tmpdir
+echo -e "\n***************Installaion Finished***************\n***************Showing Java version information***************\n"
 java -version
-printf "%s\n" "
-***************See if everything is OK***************
-"
-
+echo -e "\n***************See if everything is OK***************"
 #sudo /etc/init.d/apparmor restart
-
-EOF
