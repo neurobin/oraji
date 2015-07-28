@@ -21,7 +21,7 @@ Uininstallation Instruction:
 
 1. Give the `uninstall` file execution permission and run it.
 
-2. It will ask for version number. A suggestive default version number is provided automatically. It that is correct, just hit enter without making any changes.
+2. It will ask for version number. A suggestive default version number is provided automatically. If that is correct, just hit enter without making any changes.
 
 3. Otherwise if the  version number provided by default isn't correct, provide manually and then hit enter.
 
