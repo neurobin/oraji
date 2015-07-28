@@ -1,0 +1,37 @@
+#!/bin/bash
+BASEDIR=$(dirname "$BASH_SOURCE")
+cd "$BASEDIR"
+#if [ $EUID -ne 0 ]; then
+#printf "%s\n" "
+#*********This script should be run with root privilege*********
+#**********************Sorry! Exiting***************************
+#"
+#exit 1
+#fi
+jdkgenre="jdk"
+jdkver="$1"
+[[ $jdkver == "" ]] && 
+{
+jdkver=$(java -version 2>&1|grep -ioP "(?<=^java\sversion\s[\"'])[^\"]*")
+read -e -i "$jdkver" -p "Enter the jdk version: " jdkver
+}
+jdkname=$jdkgenre$jdkver
+[[ -d /usr/lib/jvm/$jdkname ]] || 
+{ 
+printf "%s\n" "-----Directory not found: /usr/lib/jvm/$jdkname-----
+"; exit 2;
+}
+
+export jdkname
+sudo -kEs <<\EOF
+
+[[ $jdkname == "" || $jdkname =~ \/ ]] && echo "------jdkname can not be empty or contain /------" && exit 3
+
+update-alternatives --remove "java" "/usr/lib/jvm/$jdkname/bin/java"
+update-alternatives --remove "javac" "/usr/lib/jvm/$jdkname/bin/javac"
+update-alternatives --remove "javaws" "/usr/lib/jvm/$jdkname/bin/javaws"
+
+rm -rf "/usr/lib/jvm/$jdkname"
+
+echo "******Uninstall Finished******"
+EOF
