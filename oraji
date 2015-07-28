@@ -62,5 +62,4 @@ printf "%s\n" "
 "
 
 #sudo /etc/init.d/apparmor restart
-
 EOF
