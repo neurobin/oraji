@@ -23,6 +23,6 @@ Uininstallation Instruction:
 
 2. It will ask for version number. A suggestive default version number is provided automatically. If that is correct, just hit <kbd>Enter</kbd> without making any changes.
 
-3. Otherwise if the  version number provided by default isn't correct, provide manually and then hit enter.
+3. Otherwise if the  version number provided by default isn't correct, provide manually and then hit <kbd>Enter</kbd>.
 
 Note that the version number points to the jdk install directory: `/usr/lib/jvm/jdk<version_number>`
