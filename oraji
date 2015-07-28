@@ -52,6 +52,9 @@ ln -sf /usr/lib/jvm/$jdkname/jre/lib/amd64/libnpjp2.so ~/.mozilla/plugins/
 
 [[ $tmpdir != "" ]] && sudo -u $SUDO_USER rm -rf /tmp/$tmpdir
 
+#sudo /etc/init.d/apparmor restart
+EOF
+
 printf "%s\n" "
 ***************Installaion Finished***************
 ***************Showing Java version information***************
@@ -61,5 +64,3 @@ printf "%s\n" "
 ***************See if everything is OK***************
 "
 
-#sudo /etc/init.d/apparmor restart
-EOF
