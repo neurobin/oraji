@@ -12,7 +12,8 @@ jdkgenre="jdk"
 jdkver="$1"
 [[ $jdkver == "" ]] && 
 {
-jdkver=$(java -version 2>&1|grep -ioP "(?<=^java\sversion\s[\"'])[^\"]*")
+#jdkver=$(java -version 2>&1|grep -ioP "(?<=^java\sversion\s[\"'])[^\"]*")
+jdkver=$(java -version 2>&1 |sed -n "s/^java[[:blank:]]*version[[:blank:]]*[\"']\([^\"']*\)[\"'].*/\1/pI")
 read -e -i "$jdkver" -p "Enter the jdk version: " jdkver
 }
 jdkname=$jdkgenre$jdkver
