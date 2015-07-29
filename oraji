@@ -48,11 +48,11 @@ ln -sf /usr/lib/jvm/$jdkname/jre/lib/amd64/libnpjp2.so ~/.mozilla/plugins/
 EOF
 
 printf "%s\n" "
-***************Installaion Finished***************
+*********************Installaion Finished*********************
 ***************Showing Java version information***************
 "
 java -version
 printf "%s\n" "
-***************See if everything is OK***************
+*******************See if everything is OK********************
 "
 
