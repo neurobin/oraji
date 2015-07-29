@@ -14,13 +14,13 @@ jdkgenre="jdk"
 tmpdir=__ORAJI__$RANDOM
 
 sudo -u $SUDO_USER mkdir /tmp/$tmpdir
-sudo -u $SUDO_USER tar -xvf jdk*$jdkver*.tar* -C /tmp/$tmpdir || exit 2
+sudo -u $SUDO_USER tar -xvf jdk*$jdkver*.tar* -C /tmp/$tmpdir || exit 1
 
-cd /tmp/$tmpdir/$jdkgenre* || exit 3
+cd /tmp/$tmpdir/$jdkgenre* || exit 2
 jdkname=${PWD##*/}
 
 [[ $jdkname != "" && $tmpdir != "" && $jdkgenre != "" && $jdkver != "" ]] || 
-{ echo "-----Variable can not be empty-----"; exit 4; }
+{ echo "-----Variable can not be empty-----"; exit 3; }
 
 mkdir -p /usr/lib/jvm/$jdkname
 mv -f ./* /usr/lib/jvm/$jdkname
