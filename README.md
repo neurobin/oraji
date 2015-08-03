@@ -34,5 +34,4 @@ Tested OS:
 =============
 
 1. Xubuntu 14.04.1 LTS
-2. Linux Mint 17 LTS
 
