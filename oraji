@@ -3,12 +3,16 @@ BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
 
 jdkver="$1"
-[[ $jdkver == "" ]] && read -e -p "Enter the jdk version: " jdkver
-export jdkver
+
+mytty=$(tty)
+
+export jdkver mytty
 
 #Using sudo without -k flag inside script is a security risk unless you have already checked for root privilege properly.
 #The first sudo inside a script should be used with -k flag.
 sudo -kEs <<\EOF
+
+[[ $jdkver == "" ]] && read -e -p "Enter the jdk version: " jdkver <$mytty
 
 jdkgenre="jdk"
 tmpdir=__ORAJI__$RANDOM
