@@ -30,10 +30,25 @@ Uininstallation Instruction:
 
 **Note:**
 
-1. that the version number points to the jdk install directory: `/usr/lib/jvm/jdk<version_number>`
-2. After uninstalling with this script, if Java falls back to another Java version then JAVA_HOME will **not** be updated accordingly. You will need to reinstall that version (fall back version) again with the `oraji` script to get JAVA_HOME updated. The same goes for the mozilla plugin.
+1. The version number points to the jdk install directory: `/usr/lib/jvm/jdk<version_number>`
+2. After uninstalling with this script, if Java falls back to another Java version then JAVA_HOME and other environment variables **will** be updated accordingly (you will need to run `source /etc/profile` manually to populate them immediately), but mozilla plugin will **not**. Run `ln -sf /usr/lib/jvm/jdk<version_number>/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/` in a terminal to get it back (If you really need it). `jdk<version_number>` and `your-system-architecture-here` in the above code needs to be changed to actual value
 
 ####N.B: The uninstaller is only for the oracle java installed with the `oraji` script.
+
+#ChangeLog:
+
+###`3.0`: <span class="light-quote">Tue Dec 22 19:32:07 UTC 2015</span>
+
+1. Improved portability.
+2. Lot's of bug fixed.
+3. Comprehensive install of java which makes it usable for java developers.
+
+###`3.1`: <span class="light-quote">Tue Dec 22 20:58:42 UTC 2015</span>
+
+1. Added some extra environment variables besides JAVA_HOME.
+2. Updated PATH environment variables with some new paths.
+3. JAVA_HOME is no longer deleted by uninstall script.
+4. Multiple java version management.
 
 
 Tested OS:

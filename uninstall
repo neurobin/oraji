@@ -35,11 +35,34 @@ for prog in /usr/lib/jvm/$jdkname/bin/*;do
     fi
 done
 
-rm -rf "/usr/lib/jvm/$jdkname" && echo "***removed: /usr/lib/jvm/$jdkname***"
-pat="$(echo "JAVA_HOME=/usr/lib/jvm/$jdkname" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
-sed --in-place "/^$pat/d" /etc/profile && echo "***JAVA_HOME removed***"
+rm -rf "/usr/lib/jvm/$jdkname" && echo "
+***removed: /usr/lib/jvm/$jdkname***"
 
-rm ~/.mozilla/plugins/libnpjp2.so && echo "***Mozilla plugin removed***"  # optional
+h1="export J2SDKDIR=/usr/lib/jvm/$jdkname"
+h2="export J2REDIR=/usr/lib/jvm/$jdkname/jre"
+h3="export PATH=\$PATH:/usr/lib/jvm/$jdkname/bin:/usr/lib/jvm/$jdkname/db/bin:/usr/lib/jvm/$jdkname/jre/bin"
+h4="export JAVA_HOME=/usr/lib/jvm/$jdkname"
+h5="export DERBY_HOME=/usr/lib/jvm/$jdkname/db"
 
-echo "******Uninstall Finished******"
+pat1="$(echo "$h1" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+pat2="$(echo "$h2" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+pat3="$(echo "$h3" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+pat4="$(echo "$h4" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+pat5="$(echo "$h5" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+
+sed --in-place "/^$pat1/d" /etc/profile &&
+sed --in-place "/^$pat2/d" /etc/profile &&
+sed --in-place "/^$pat3/d" /etc/profile &&
+sed --in-place "/^$pat4/d" /etc/profile &&
+sed --in-place "/^$pat5/d" /etc/profile &&
+source /etc/profile >/dev/null &&
+echo "
+***removed environment variables***"
+
+rm ~/.mozilla/plugins/libnpjp2.so && echo >/dev/null 2>&1 "
+***Mozilla plugin removed***" ||
+echo "---Mozilla plugin not found (ignore this error)---" # optional
+
+echo "
+******Uninstall Finished******"
 

@@ -29,15 +29,31 @@ jdkname=${PWD##*/}
 mkdir -p /usr/lib/jvm/$jdkname
 mv -f ./* -t /usr/lib/jvm/$jdkname
 
+pr=22222
+if update-alternatives --display java >/dev/null 2>&1;then
+    oldIFS=$IFS
+    IFS=$'\n' arr=($(update-alternatives --display java |grep -oE 'priority\s+[0-9]+' |grep -oE '[0-9]+' |sort -u))
+    IFS=$oldIFS
+    ## Find an upper priority
+    max=0
+    for n in "${arr[@]}" ; do
+        ((n > max)) && max=$n
+    done
+    
+    ((pr<=max)) && pr=$((max+1))
+fi
+
 for prog in /usr/lib/jvm/$jdkname/bin/*;do
     progn="${prog##*/}"
     [[ $progn == *"."* ]] && continue
     if [[ -f $prog ]];then
-        update-alternatives --install "/usr/bin/$progn" "$progn" "/usr/lib/jvm/$jdkname/bin/$progn" 1111
+        update-alternatives --install "/usr/bin/$progn" "$progn" "/usr/lib/jvm/$jdkname/bin/$progn" $pr
         chmod a+x "/usr/bin/$progn"
         update-alternatives --set "$progn" "/usr/lib/jvm/$jdkname/bin/$progn"
     fi
 done
+
+
 
 chown -R root:root /usr/lib/jvm/$jdkname
 [[ $tmpdir != "" ]] &&  rm -rf $tmpdir
@@ -61,23 +77,34 @@ jv=${jdkname/#jdk/}  ##extracting java version from jdkname
 if echo "$(java -version 2>&1)" |grep -qsi "java version.*$jv" ; then
 
     echo "
-    ...updating JAVA_HOME..."
+    ...updating JAVA_HOME and other environment variables..."
+    h1="export J2SDKDIR=/usr/lib/jvm/$jdkname"
+    h2="export J2REDIR=/usr/lib/jvm/$jdkname/jre"
+    h3="export PATH=\$PATH:/usr/lib/jvm/$jdkname/bin:/usr/lib/jvm/$jdkname/db/bin:/usr/lib/jvm/$jdkname/jre/bin"
+    h4="export JAVA_HOME=/usr/lib/jvm/$jdkname"
+    h5="export DERBY_HOME=/usr/lib/jvm/$jdkname/db"
     
-    # update JAVA_HOME
-    pat="$(echo 'PATH=$PATH:$HOME/bin:$JAVA_HOME/bin' |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
-    sed --in-place '${/^export PATH/d;}' /etc/profile &&
-    sed --in-place '/^JAVA_HOME=/d' /etc/profile &&
-    sed --in-place "/^$pat/d" /etc/profile &&
-    sed --in-place '/^export JAVA_HOME/d' /etc/profile &&
-    sed --in-place "$ a\JAVA_HOME=/usr/lib/jvm/$jdkname" /etc/profile && 
-    sed --in-place '$ a\PATH=$PATH:$HOME/bin:$JAVA_HOME/bin' /etc/profile &&
-    sed --in-place '$ a\export JAVA_HOME' /etc/profile &&
-    sed --in-place '$ a\export PATH' /etc/profile &&
-    . /etc/profile &&
+    pat1="$(echo "$h1" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat2="$(echo "$h2" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat3="$(echo "$h3" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat4="$(echo "$h4" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat5="$(echo "$h5" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    
+    sed --in-place "/^$pat1/d" /etc/profile &&
+    sed --in-place "/^$pat2/d" /etc/profile &&
+    sed --in-place "/^$pat3/d" /etc/profile &&
+    sed --in-place "/^$pat4/d" /etc/profile &&
+    sed --in-place "/^$pat5/d" /etc/profile &&
+    sed --in-place "\$s#\$#\n$h1#" /etc/profile && 
+    sed --in-place "\$s#\$#\n$h2#" /etc/profile &&
+    sed --in-place "\$s#\$#\n$h3#" /etc/profile &&
+    sed --in-place "\$s#\$#\n$h4#" /etc/profile &&
+    sed --in-place "\$s#\$#\n$h5#" /etc/profile &&
+    . /etc/profile >/dev/null &&
     echo "
-    ***JAVA_HOME updated successfully***" ||
+    ***environment variables updated successfully***" ||
     echo "
-    ---Failed to update JAVA_HOME"
+    ---Failed to update environment variables"
 
     #The following 4 lines is optional (needed for mozilla firefox)
     echo "
@@ -98,6 +125,7 @@ if echo "$(java -version 2>&1)" |grep -qsi "java version.*$jv" ; then
     java -version
     printf "%s\n" "
     *******************See if everything is OK********************
+    (To populate environment variables immediately run 'source /etc/profile' manually)
     "
 else
     echo "-----Failed to install java. Run 'java -version' manually to confirm.----"
