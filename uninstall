@@ -2,11 +2,17 @@
 BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
 
+if [ $EUID -ne 0 ]; then
+    echo -e "\n*********This script must be run with root priviledge*********"
+    echo -e "*******************Sorry! Exiting*************************\n"
+    exit 1
+fi
+
 jdkgenre="jdk"
 jdkver="$1"
 [[ $jdkver == "" ]] && 
 {
-#jdkver=$(java -version 2>&1|grep -ioP "(?<=^java\sversion\s[\"'])[^\"]*")
+#jdkver=$(java -version 2>&1|grep -ioP "(?<=^java\sversion\s[\"'])[^\"]*")  # -P flag is not portable
 jdkver=$(java -version 2>&1 |sed -n "s/^java[[:blank:]]*version[[:blank:]]*[\"']\([^\"']*\)[\"'].*/\1/pI")
 read -e -i "$jdkver" -p "Enter the jdk version: " jdkver
 }
@@ -17,16 +23,23 @@ printf "%s\n" "-----Directory not found: /usr/lib/jvm/$jdkname-----
 "; exit 2;
 }
 
-export jdkname
-sudo -kEs <<\EOF
 
 [[ $jdkname == "" || $jdkname =~ \/ ]] && echo "------jdkname can not be empty or contain /------" && exit 3
 
-update-alternatives --remove "java" "/usr/lib/jvm/$jdkname/bin/java"
-update-alternatives --remove "javac" "/usr/lib/jvm/$jdkname/bin/javac"
-update-alternatives --remove "javaws" "/usr/lib/jvm/$jdkname/bin/javaws"
 
-rm -rf "/usr/lib/jvm/$jdkname"
+for prog in /usr/lib/jvm/$jdkname/bin/*;do
+    progn="${prog##*/}"
+    [[ $progn == *"."* ]] && continue
+    if [[ -f $prog ]];then
+        update-alternatives --remove "$progn" "/usr/lib/jvm/$jdkname/bin/$progn"
+    fi
+done
+
+rm -rf "/usr/lib/jvm/$jdkname" && echo "***removed: /usr/lib/jvm/$jdkname***"
+pat="$(echo "JAVA_HOME=/usr/lib/jvm/$jdkname" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+sed --in-place "/^$pat/d" /etc/profile && echo "***JAVA_HOME removed***"
+
+rm ~/.mozilla/plugins/libnpjp2.so && echo "***Mozilla plugin removed***"  # optional
 
 echo "******Uninstall Finished******"
-EOF
+

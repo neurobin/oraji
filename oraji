@@ -2,61 +2,104 @@
 BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
 
+if [ $EUID -ne 0 ]; then
+    echo -e "\n*********This script must be run with root priviledge*********"
+    echo -e "*******************Sorry! Exiting*************************\n"
+    exit 1
+fi
+
+
 jdkver="$1"
 
-mytty=$(tty)
+#mytty=$(tty)
 
-export jdkver mytty
-
-#Using sudo without -k flag inside script is a security risk unless you have already checked for root privilege properly.
-#The first sudo inside a script should be used with -k flag.
-sudo -kEs <<\EOF
-
-[[ $jdkver == "" ]] && read -e -p "Enter the jdk version: " jdkver <$mytty
+[[ $jdkver == "" ]] && read -e -p "Enter the jdk version: " jdkver
 
 jdkgenre="jdk"
-tmpdir=__ORAJI__$RANDOM
+tmpdir="$(mktemp -d)"
 
-sudo -u $SUDO_USER mkdir /tmp/$tmpdir
-sudo -u $SUDO_USER tar -xvf jdk*$jdkver*.tar* -C /tmp/$tmpdir || exit 1
+tar -xvf jdk*$jdkver*.tar* -C "$tmpdir" || { echo "Failed to extract archive"; exit 1; }
 
-cd /tmp/$tmpdir/$jdkgenre* || exit 2
+cd $tmpdir/$jdkgenre* || { echo "Failed to create temporary directory: $jdkgenre"; exit 2; }
 jdkname=${PWD##*/}
 
 [[ $jdkname != "" && $tmpdir != "" && $jdkgenre != "" && $jdkver != "" ]] || 
 { echo "-----Variable can not be empty-----"; exit 3; }
 
 mkdir -p /usr/lib/jvm/$jdkname
-mv -f ./* /usr/lib/jvm/$jdkname
+mv -f ./* -t /usr/lib/jvm/$jdkname
 
-update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/$jdkname/bin/java" 1111
-update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/$jdkname/bin/javac" 1111
-update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/$jdkname/bin/javaws" 1111
-update-alternatives --set java /usr/lib/jvm/$jdkname/bin/java
-update-alternatives --set javac /usr/lib/jvm/$jdkname/bin/javac
-update-alternatives --set javaws /usr/lib/jvm/$jdkname/bin/javaws
+for prog in /usr/lib/jvm/$jdkname/bin/*;do
+    progn="${prog##*/}"
+    [[ $progn == *"."* ]] && continue
+    if [[ -f $prog ]];then
+        update-alternatives --install "/usr/bin/$progn" "$progn" "/usr/lib/jvm/$jdkname/bin/$progn" 1111
+        chmod a+x "/usr/bin/$progn"
+        update-alternatives --set "$progn" "/usr/lib/jvm/$jdkname/bin/$progn"
+    fi
+done
 
-chmod a+x /usr/bin/java
-chmod a+x /usr/bin/javac
-chmod a+x /usr/bin/javaws
 chown -R root:root /usr/lib/jvm/$jdkname
+[[ $tmpdir != "" ]] &&  rm -rf $tmpdir
 
-#The following two lines is optional (needed for mozilla firefox)
-sudo -u $SUDO_USER mkdir -p ~/.mozilla/plugins
-ln -sf /usr/lib/jvm/$jdkname/jre/lib/amd64/libnpjp2.so ~/.mozilla/plugins/
-#The above two lines is optional (needed for mozilla firefox)
+# /etc/init.d/apparmor restart  # not needed
 
-[[ $tmpdir != "" ]] && sudo -u $SUDO_USER rm -rf /tmp/$tmpdir
+##Basic installation finished
 
-#sudo /etc/init.d/apparmor restart
-EOF
+cd ~ # needed to run java -version
 
-printf "%s\n" "
-*********************Installaion Finished*********************
-***************Showing Java version information***************
-"
-java -version
-printf "%s\n" "
-*******************See if everything is OK********************
-"
+
+if echo "$(java -version 2>&1)" |grep -qsi "64-Bit";then
+    arch=amd64
+else 
+    arch=i386  ## detect arch
+fi
+
+jv=${jdkname/#jdk/}  ##extracting java version from jdkname
+
+
+if echo "$(java -version 2>&1)" |grep -qsi "java version.*$jv" ; then
+
+    echo "
+    ...updating JAVA_HOME..."
+    
+    # update JAVA_HOME
+    pat="$(echo 'PATH=$PATH:$HOME/bin:$JAVA_HOME/bin' |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    sed --in-place '${/^export PATH/d;}' /etc/profile &&
+    sed --in-place '/^JAVA_HOME=/d' /etc/profile &&
+    sed --in-place "/^$pat/d" /etc/profile &&
+    sed --in-place '/^export JAVA_HOME/d' /etc/profile &&
+    sed --in-place "$ a\JAVA_HOME=/usr/lib/jvm/$jdkname" /etc/profile && 
+    sed --in-place '$ a\PATH=$PATH:$HOME/bin:$JAVA_HOME/bin' /etc/profile &&
+    sed --in-place '$ a\export JAVA_HOME' /etc/profile &&
+    sed --in-place '$ a\export PATH' /etc/profile &&
+    . /etc/profile &&
+    echo "
+    ***JAVA_HOME updated successfully***" ||
+    echo "
+    ---Failed to update JAVA_HOME"
+
+    #The following 4 lines is optional (needed for mozilla firefox)
+    echo "
+    ...Managing mozilla plugin..."
+    mkdir -p ~/.mozilla/plugins
+    ln -sf /usr/lib/jvm/$jdkname/jre/lib/$arch/libnpjp2.so ~/.mozilla/plugins/ &&
+    echo "
+    ***Managed mozilla plugin successfully***" ||
+    echo "
+    ---Failed to manage mozilla plugin. If you think it's necessary run 
+    ln -sf /usr/lib/jvm/$jdkname/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/
+    manually, otherwise ignore."
+    #The above 4 lines is optional (needed for mozilla firefox)
+    printf "%s\n" "
+    *********************Installaion Finished*********************
+    ***************Showing Java version information***************
+    "
+    java -version
+    printf "%s\n" "
+    *******************See if everything is OK********************
+    "
+else
+    echo "-----Failed to install java. Run 'java -version' manually to confirm.----"
+fi
 
