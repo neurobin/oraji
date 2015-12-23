@@ -1,7 +1,7 @@
 Oracle Java Installer
 ====================
 
-Oracle java (jdk and/or jre) installler script for linux. It simplifies the installation of Oracle java (jdk and/or jre) from a [download](http://www.oracle.com/technetwork/java/javase/downloads/index.html)ed source (tar.gz). It also maintains consistency among multiple versions of java (jdk and/or jre) installed with this script.
+Oracle java (jdk/jre) installler script for linux. It simplifies the installation of Oracle java from a [download](http://www.oracle.com/technetwork/java/javase/downloads/index.html)ed source (tar.gz). It also maintains consistency among multiple versions of java (jdk/jre) installed with this script. Uninstalling any java version installed with this script will fall back to the next most recently installed (with this script) version of java.
 
 Install oraji:
 =====================
@@ -35,10 +35,10 @@ Java Uninstallation Instruction:
 
 **Note:**
 
-1. The java version points to the jdk/jre install directory: `/usr/lib/jvm/jdk|jre<version_number>`
+1. The java version points to the jdk/jre install directory: `/usr/lib/jvm/jdk|jre<version_number>` and comprises with both the *jdk/jre* part and the *version_number* part. You shouldn't run `oraji -u version` (with a version argument) unless you are sure of it. Simply run `oraji -u` and let oraji detect the version for you.
 2. After uninstalling with this script, if Java falls back to another Java version then JAVA_HOME and other environment variables **will** be updated accordingly (you will need to run `source /etc/profile` manually to populate them immediately),  mozilla plugin will be restored to the fallback java.
 
-####N.B: The uninstallation method is only for the oracle java installed with the `oraji` script.
+**N.B:** The uninstallation method is only for the oracle java installed with the `oraji` script. It deletes the */usr/lib/jvm/jdk|jre<version_number>* directory and all exports and environment variables that was included in */etc/profile* by oraji and the mozilla plugin. If a fall back java is available, exports and environment variables will be available for this java version and mozilla plugin will be restored.
 
 #ChangeLog:
 
