@@ -66,6 +66,11 @@ Java Uninstallation Instruction:
 6. `oraji -u` to uninstall java.
 7. Internal multiple java version management.
 
+###`4.0.1`: <span class="light-quote">Wed Dec 23 04:34:25 UTC 2015</span>
+
+1. Input prompt improved.
+2. tilde (~) expansion supported in input prompt.
+3. Minor bug fix
 
 Tested OS:
 =============

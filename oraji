@@ -2,11 +2,20 @@
 BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
 
+project="oraji"
 version="4.0.0"
+author="Md. Jahidul Hamid"
+source="https://github.com/neurobin/$project"
+bug_report="$source/issues"
+version_info="
+********************** $project **********************
+Version    : $version
+Author     : $author
+Source     : $source
+Bug report : $bug_report
+"
 
-
-[[ $1 == "-v" || $1 == "--version" ]] && { echo "oraji version: $version";exit 0; }
-
+[[ $1 == "-v" || $1 == "--version" ]] && { echo "$version_info";exit 0; }
 
 shopt -s extglob
 
@@ -18,7 +27,7 @@ if [ $EUID -ne 0 ]; then
     exit 1
 fi
 
-#######################################Uninstall function########################################
+####################################### Uninstall function ########################################
 uninstall(){
     shopt -s extglob
     
@@ -36,6 +45,8 @@ uninstall(){
         [[ $jname =~ $patt ]]
         jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
         read -e -i "$jname" -p "Enter the java version (with jdk/jre): " jname
+    else
+        read -e -i "$jname" -p "Enter the java version (with jdk/jre): " jname
     fi
     }
     
@@ -51,7 +62,8 @@ uninstall(){
     ------java name can not be empty or contain /------" && exit 4
     
     patt="^(jdk|jre).*"
-    [[ $jname =~ $patt ]]
+    [[ $jname =~ $patt ]] || { echo "
+    ------Couldn't recognize java name/version------";exit 5; }
     jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
     doing=false;
     for prog in /usr/lib/jvm/$jname/bin/*;do
@@ -134,10 +146,54 @@ uninstall(){
     
     echo "
     ******Uninstall Finished******"
-    
 }
-#######################################Uninstall function########################################
+####################################### Uninstall function ########################################
 
+####################################### Expand path function ######################################
+
+expandPath() {
+  local path
+  local -a pathElements resultPathElements
+  IFS=':' read -r -a pathElements <<<"$1"
+  : "${pathElements[@]}"
+  for path in "${pathElements[@]}"; do
+    : "$path"
+    case $path in
+      "~+"/*)
+        path=$PWD/${path#"~+/"}
+        ;;
+      "~-"/*)
+        path=$OLDPWD/${path#"~-/"}
+        ;;
+      "~"/*)
+        path=$HOME/${path#"~/"}
+        ;;
+      "~"*)
+        old="$path"
+        username=${path%%/*}
+        username=${username#"~"}
+        if [ x"$username" = x ];then
+            path=$HOME
+        else
+            IFS=: read _ _ _ _ _ homedir _ < <(getent passwd "$username")
+            if [[ $path = */* ]]; then
+              path=${homedir}/${path#*/}
+            else
+              path=$homedir
+            fi
+            if [ x"$path" = x ]; then
+                path="$old"
+            fi
+        fi
+        ;;
+    esac
+    resultPathElements+=( "$path" )
+  done
+  local result
+  printf -v result '%s:' "${resultPathElements[@]}"
+  printf '%s\n' "${result%:}"
+}
+####################################### Expand path function ######################################
 
 [[ $1 == "-u" ]] && { uninstall "$2";exit 0; }
 
@@ -145,8 +201,13 @@ jpath="$1"
 
 #mytty=$(tty)
 
-[[ $jpath == "" ]] && read -e -p "Enter the java archive path: " jpath
+[[ $jpath == "" ]] && read -e -p "Enter the java archive path: " jpath && jpath="$(expandPath "$jpath")"
 
+##Validate jpath
+
+[[ ! $jpath =~ .*(jdk|jre).*\.tar\..* ]] && { echo "Doesn't seem to be a valid archive: $jpath";exit 2;}
+[[ -d $jpath ]] && { echo "You must pass an an archive file, not a directory";exit 2; }
+[[ ! -f $jpath ]] && { echo "No such file: $jpath";exit 2;}
 
 tmpdir="$(mktemp -d)"
 
@@ -189,8 +250,6 @@ for prog in /usr/lib/jvm/$jname/bin/*;do
     fi
 done
 
-
-
 chown -R root:root /usr/lib/jvm/$jname
 [[ $tmpdir != "" ]] &&  rm -rf $tmpdir
 
@@ -199,7 +258,6 @@ chown -R root:root /usr/lib/jvm/$jname
 ##Basic installation finished
 
 cd ~ # needed to run java -version
-
 
 if echo "$(java -version 2>&1)" |grep -qsi "64-Bit";then
     arch=amd64
