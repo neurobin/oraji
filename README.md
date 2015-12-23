@@ -1,39 +1,44 @@
 OracleJDKInstaller
 ==================
 
-Oracle JDK installler script for linux
+Oracle java (jdk and/or jre) installler script for linux. It simplifies the installation of Oracle java (jdk and/or jre) from a [download](http://www.oracle.com/technetwork/java/javase/downloads/index.html)ed source (tar.gz). It also maintains consistency among multiple versions of java (jdk and/or jre) installed with this script.
 
-Installation Instruction:
-=========================
+Install oraji:
+=====================
 
-1. Put the `oraji` file inside the folder where you have downloaded the archive of oracle jdk (tar.gz)
+Give the <span class="light-quote">install.sh</span> file execution permission and run it in terminal (with root privillege).
 
-2. Give the install script execution permission (`sudo chmod +x path_to_the_folder/oraji`)
+```sh
+sudo ./install.sh
+```
 
-3. Now run the script `oraji` in terminal (with root permission), or just drag and drop it in terminal (add `sudo` if you are not root) and hit <kbd>Enter</kbd>.
+Java Installation Instruction:
+=============================
 
-4. It will ask for version number. Give the version number. (Example: `8` or `8u25`, must match with the archive)
+Run in terminal:
 
-5. You can provide the version number as command line argument too, i.e `sudo /path/to/the/oraji version_number`. For example: `sudo ./oraji 8u25`
+```sh
+sudo oraji /path/to/the/java/archive
+```
+(or run `sudo /path/to/oraji /path/to/the/java/archive` after giving the *oraji* script execution permission if you didn't install the script).
 
-**Notice:**  `oriji (<3.0)` is buggy and not usable for development purposes. Please update to `oraji >=3.0`.
+That's it. Now if you want to populate JAVA_HOME and other environment variables run `source /etc/profile` or logout and login.
 
 
-Uininstallation Instruction:
+Java Uininstallation Instruction:
 ============================
 
-1. Give the `uninstall` file execution permission and run it (use `sudo` if you are not root).
-
-2. It will ask for version number. A suggestive default version number is provided automatically. If that is correct, just hit <kbd>Enter</kbd> without making any changes.
-
-3. Otherwise if the  version number provided by default isn't correct, provide manually and then hit <kbd>Enter</kbd>.
+1. Run `oraji -u` (or `path/to/oraji -u` if you didn't install the *oraji* script).
+2. It will ask for java version. An auto detected version is provided as suggestion. If that is correct, just hit <kbd>Enter</kbd> without making any changes.
+3. Otherwise if the java version provided by default isn't correct (this shouldn't happen), provide manually and then hit <kbd>Enter</kbd>.
+4. The version can be provided as command line argument too i.e `oraji -u version` (or `/path/to/oraji -u version` if you didn't install the script).
 
 **Note:**
 
-1. The version number points to the jdk install directory: `/usr/lib/jvm/jdk<version_number>`
-2. After uninstalling with this script, if Java falls back to another Java version then JAVA_HOME and other environment variables **will** be updated accordingly (you will need to run `source /etc/profile` manually to populate them immediately), but mozilla plugin will **not**. Run `ln -sf /usr/lib/jvm/jdk<version_number>/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/` in a terminal to get it back (If you really need it). `jdk<version_number>` and `your-system-architecture-here` in the above code needs to be changed to actual value
+1. The java version points to the jdk/jre install directory: `/usr/lib/jvm/jdk|jre<version_number>`
+2. After uninstalling with this script, if Java falls back to another Java version then JAVA_HOME and other environment variables **will** be updated accordingly (you will need to run `source /etc/profile` manually to populate them immediately),  mozilla plugin will be restored to the fallback java. If mozilla plugin fails to restore (this shouldn't happen) then run <pre><code>ln -sf /usr/lib/jvm/jdk<version_number>/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/</code></pre> in a terminal to get it back (If you really need it). `jdk<version_number>` and `your-system-architecture-here` in the above code needs to be changed to actual value.
 
-####N.B: The uninstaller is only for the oracle java installed with the `oraji` script.
+####N.B: The uninstallation method is only for the oracle java installed with the `oraji` script.
 
 #ChangeLog:
 
@@ -49,6 +54,17 @@ Uininstallation Instruction:
 2. Updated PATH environment variables with some new paths.
 3. JAVA_HOME is no longer deleted by uninstall script.
 4. Multiple java version management.
+
+###`4.0.0`: <span class="light-quote">Tue Dec 22 23:37:16 UTC 2015</span>
+
+0. an install.sh script to install *oraji*.
+1. Takes the path of the archive instead of version name.
+2. Can be run from any directory.
+3. Both jdk and jre can be installed/uinstalled.
+4. If multiple version of jdk/jre is installed, then upon uninstallation of a version, java automatically falls back to a previously (most recent) installed version.
+5. `oraji -v` provides version info of `oraji` itself.
+6. `oraji -u` to uninstall java.
+7. Internal multiple java version management.
 
 
 Tested OS:

@@ -2,34 +2,170 @@
 BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
 
+version="4.0.0"
+
+
+[[ $1 == "-v" || $1 == "--version" ]] && { echo "oraji version: $version";exit 0; }
+
+
+shopt -s extglob
+
 if [ $EUID -ne 0 ]; then
-    echo -e "\n*********This script must be run with root priviledge*********"
-    echo -e "*******************Sorry! Exiting*************************\n"
+    echo "
+    *********This script must be run with root privilege*********
+    *******************Sorry! Abort!*****************************
+    "
     exit 1
 fi
 
+#######################################Uninstall function########################################
+uninstall(){
+    shopt -s extglob
+    
+    jname="$1"
+    
+    [[ $jname =~ ^(jdk|jre).* || ! -d /usr/lib/jvm/$jname ]] && { echo "
+    ---Invalid java name/version.---"; exit 2; }
+    
+    [[ $jname == "" ]] && 
+    {
+    if update-alternatives --display java >/dev/null 2>&1;then
+        jname=$(update-alternatives --display  java |grep -oE 'points\s*to\s*/usr/lib/jvm/[^/]*')
+        jname="${jname##*/}"
+        patt="^(jdk|jre).*"
+        [[ $jname =~ $patt ]]
+        jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
+        read -e -i "$jname" -p "Enter the java version (with jdk/jre): " jname
+    fi
+    }
+    
+    [[ -d /usr/lib/jvm/$jname ]] || 
+    { 
+    printf "%s\n" "
+    -----Directory not found: /usr/lib/jvm/$jname-----
+    "; exit 3;
+    }
+    
+    
+    [[ $jname == "" || $jname =~ \/ ]] && echo "
+    ------java name can not be empty or contain /------" && exit 4
+    
+    patt="^(jdk|jre).*"
+    [[ $jname =~ $patt ]]
+    jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
+    doing=false;
+    for prog in /usr/lib/jvm/$jname/bin/*;do
+        progn="${prog##*/}"
+        [[ $progn == *"."* ]] && continue
+        if [[ -f $prog ]];then
+            update-alternatives --remove "$progn" "/usr/lib/jvm/$jname/bin/$progn"
+            doing=true
+        fi
+    done
+    
+    rm -rf "/usr/lib/jvm/$jname" && echo "
+    ***removed: /usr/lib/jvm/$jname***"
+    
+    h1="export J2SDKDIR=/usr/lib/jvm/$jname"
+    h2="export J2REDIR=/usr/lib/jvm/$jname/jre"
+    if [[ $jgenre == "jdk" ]];then
+        h3="export PATH=\$PATH:/usr/lib/jvm/$jname/bin:/usr/lib/jvm/$jname/db/bin:/usr/lib/jvm/$jname/jre/bin"
+    else
+        h3="export PATH=\$PATH:/usr/lib/jvm/$jname/bin"
+    fi
+    h4="export JAVA_HOME=/usr/lib/jvm/$jname"
+    h5="export DERBY_HOME=/usr/lib/jvm/$jname/db"
+    
+    pat1="$(echo "$h1" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat2="$(echo "$h2" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat3="$(echo "$h3" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat4="$(echo "$h4" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat5="$(echo "$h5" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    
+    if [[ $jgenre == "jdk" ]];then
+        sed --in-place "/^$pat1/d" /etc/profile &&
+        sed --in-place "/^$pat2/d" /etc/profile &&
+        sed --in-place "/^$pat3/d" /etc/profile &&
+        sed --in-place "/^$pat4/d" /etc/profile &&
+        sed --in-place "/^$pat5/d" /etc/profile
+    else
+        sed --in-place "/^$pat3/d" /etc/profile &&
+        sed --in-place "/^$pat4/d" /etc/profile
+    fi
+    (( $? == 0 )) &&
+    source /etc/profile >/dev/null &&
+    echo "
+    ***removed java environment variables***"
+    
+    ##We will only remove mozilla plugins for active java versions.
+    if $doing;then 
+        rm ~/.mozilla/plugins/libnpjp2.so && echo "
+    ***Mozilla plugin removed***" ||
+        echo "
+    ---Mozilla plugin not found (ignore this error)---" # optional
+    fi
+    
+    ##try to restore mozilla plugin
+    
+    if update-alternatives --display java >/dev/null 2>&1;then
+        if echo "$(java -version 2>&1)" |grep -qsi "64-Bit";then
+            arch=amd64
+        else 
+            arch=i386  ## detect arch
+        fi
+        jname=$(update-alternatives --display  java |grep -oE 'points\s*to\s*/usr/lib/jvm/[^/]*')
+        jname="${jname##*/}"
+        patt="^(jdk|jre).*"
+        [[ $jname =~ $patt ]]
+        jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
+        
+        [[ $jgenre == "jdk" ]] && ln -sf /usr/lib/jvm/$jname/jre/lib/$arch/libnpjp2.so ~/.mozilla/plugins/ ||
+        {
+        [[ $jgenre == "jre" ]] && ln -sf /usr/lib/jvm/$jname/lib/$arch/libnpjp2.so ~/.mozilla/plugins/
+        } && echo "
+    ***Mozilla plugin restored for fall back java version***" ||
+        echo "
+    ---Couldn't restore mozilla plugin. Restore it manually if needed.
+    For jdk: ln -sf /usr/lib/jvm/jdk<version_number>/jre/lib/your_arch/libnpjp2.so ~/.mozilla/plugins/
+    For jre: ln -sf /usr/lib/jvm/jre<version_number>/lib/your_arch/libnpjp2.so ~/.mozilla/plugins/"
+        
+    fi
+    
+    
+    echo "
+    ******Uninstall Finished******"
+    
+}
+#######################################Uninstall function########################################
 
-jdkver="$1"
+
+[[ $1 == "-u" ]] && { uninstall "$2";exit 0; }
+
+jpath="$1"
 
 #mytty=$(tty)
 
-[[ $jdkver == "" ]] && read -e -p "Enter the jdk version: " jdkver
+[[ $jpath == "" ]] && read -e -p "Enter the java archive path: " jpath
 
-jdkgenre="jdk"
+
 tmpdir="$(mktemp -d)"
 
-tar -xvf jdk*$jdkver*.tar* -C "$tmpdir" || { echo "Failed to extract archive"; exit 1; }
+tar -xvf $jpath -C "$tmpdir" || { echo "Failed to extract archive"; exit 2; }
 
-cd $tmpdir/$jdkgenre* || { echo "Failed to create temporary directory: $jdkgenre"; exit 2; }
-jdkname=${PWD##*/}
+cd $tmpdir/j* || { echo "Couldn't find java directory"; exit 3; }
+jname=${PWD##*/}
+patt="^(jdk|jre).*"
+[[ $jname =~ $patt ]]
+jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
 
-[[ $jdkname != "" && $tmpdir != "" && $jdkgenre != "" && $jdkver != "" ]] || 
-{ echo "-----Variable can not be empty-----"; exit 3; }
+[[ $jname != "" && $tmpdir != "" ]] || 
+{ echo "-----Variable can not be empty-----"; exit 4; }
 
-mkdir -p /usr/lib/jvm/$jdkname
-mv -f ./* -t /usr/lib/jvm/$jdkname
+mkdir -p /usr/lib/jvm/$jname
+mv -f ./* -t /usr/lib/jvm/$jname
 
-pr=22222
+pr=22222  ## priority
+
 if update-alternatives --display java >/dev/null 2>&1;then
     oldIFS=$IFS
     IFS=$'\n' arr=($(update-alternatives --display java |grep -oE 'priority\s+[0-9]+' |grep -oE '[0-9]+' |sort -u))
@@ -43,19 +179,19 @@ if update-alternatives --display java >/dev/null 2>&1;then
     ((pr<=max)) && pr=$((max+1))
 fi
 
-for prog in /usr/lib/jvm/$jdkname/bin/*;do
+for prog in /usr/lib/jvm/$jname/bin/*;do
     progn="${prog##*/}"
     [[ $progn == *"."* ]] && continue
     if [[ -f $prog ]];then
-        update-alternatives --install "/usr/bin/$progn" "$progn" "/usr/lib/jvm/$jdkname/bin/$progn" $pr
+        update-alternatives --install "/usr/bin/$progn" "$progn" "/usr/lib/jvm/$jname/bin/$progn" $pr
         chmod a+x "/usr/bin/$progn"
-        update-alternatives --set "$progn" "/usr/lib/jvm/$jdkname/bin/$progn"
+        update-alternatives --set "$progn" "/usr/lib/jvm/$jname/bin/$progn"
     fi
 done
 
 
 
-chown -R root:root /usr/lib/jvm/$jdkname
+chown -R root:root /usr/lib/jvm/$jname
 [[ $tmpdir != "" ]] &&  rm -rf $tmpdir
 
 # /etc/init.d/apparmor restart  # not needed
@@ -71,53 +207,68 @@ else
     arch=i386  ## detect arch
 fi
 
-jv=${jdkname/#jdk/}  ##extracting java version from jdkname
+jv=${jname/#jre/}
+jv=${jv/#jdk/}  ##extracting java version from jname
 
+echo $jv
 
 if echo "$(java -version 2>&1)" |grep -qsi "java version.*$jv" ; then
 
     echo "
     ...updating JAVA_HOME and other environment variables..."
-    h1="export J2SDKDIR=/usr/lib/jvm/$jdkname"
-    h2="export J2REDIR=/usr/lib/jvm/$jdkname/jre"
-    h3="export PATH=\$PATH:/usr/lib/jvm/$jdkname/bin:/usr/lib/jvm/$jdkname/db/bin:/usr/lib/jvm/$jdkname/jre/bin"
-    h4="export JAVA_HOME=/usr/lib/jvm/$jdkname"
-    h5="export DERBY_HOME=/usr/lib/jvm/$jdkname/db"
+    h1="export J2SDKDIR=/usr/lib/jvm/$jname"
+    h2="export J2REDIR=/usr/lib/jvm/$jname/jre"
+    if [[ $jgenre == "jdk" ]];then
+        h3="export PATH=\$PATH:/usr/lib/jvm/$jname/bin:/usr/lib/jvm/$jname/db/bin:/usr/lib/jvm/$jname/jre/bin"
+    else
+        h3="export PATH=\$PATH:/usr/lib/jvm/$jname/bin"
+    fi
+    h4="export JAVA_HOME=/usr/lib/jvm/$jname"
+    h5="export DERBY_HOME=/usr/lib/jvm/$jname/db"
     
     pat1="$(echo "$h1" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
     pat2="$(echo "$h2" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
     pat3="$(echo "$h3" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
     pat4="$(echo "$h4" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
     pat5="$(echo "$h5" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
-    
-    sed --in-place "/^$pat1/d" /etc/profile &&
-    sed --in-place "/^$pat2/d" /etc/profile &&
-    sed --in-place "/^$pat3/d" /etc/profile &&
-    sed --in-place "/^$pat4/d" /etc/profile &&
-    sed --in-place "/^$pat5/d" /etc/profile &&
-    sed --in-place "\$s#\$#\n$h1#" /etc/profile && 
-    sed --in-place "\$s#\$#\n$h2#" /etc/profile &&
-    sed --in-place "\$s#\$#\n$h3#" /etc/profile &&
-    sed --in-place "\$s#\$#\n$h4#" /etc/profile &&
-    sed --in-place "\$s#\$#\n$h5#" /etc/profile &&
+    if [[ $jgenre == "jdk" ]];then
+        sed --in-place "/^$pat1/d" /etc/profile &&
+        sed --in-place "/^$pat2/d" /etc/profile &&
+        sed --in-place "/^$pat3/d" /etc/profile &&
+        sed --in-place "/^$pat4/d" /etc/profile &&
+        sed --in-place "/^$pat5/d" /etc/profile &&
+        sed --in-place "\$s#\$#\n$h1#" /etc/profile && 
+        sed --in-place "\$s#\$#\n$h2#" /etc/profile &&
+        sed --in-place "\$s#\$#\n$h3#" /etc/profile &&
+        sed --in-place "\$s#\$#\n$h4#" /etc/profile &&
+        sed --in-place "\$s#\$#\n$h5#" /etc/profile
+    else
+        sed --in-place "/^$pat3/d" /etc/profile &&
+        sed --in-place "/^$pat4/d" /etc/profile &&
+        sed --in-place "\$s#\$#\n$h3#" /etc/profile &&
+        sed --in-place "\$s#\$#\n$h4#" /etc/profile
+    fi
+    (( $? == 0 )) &&
     . /etc/profile >/dev/null &&
     echo "
     ***environment variables updated successfully***" ||
     echo "
     ---Failed to update environment variables"
 
-    #The following 4 lines is optional (needed for mozilla firefox)
     echo "
     ...Managing mozilla plugin..."
     mkdir -p ~/.mozilla/plugins
-    ln -sf /usr/lib/jvm/$jdkname/jre/lib/$arch/libnpjp2.so ~/.mozilla/plugins/ &&
-    echo "
+    if [[ $jgenre == "jdk" ]];then
+        ln -sf /usr/lib/jvm/$jname/jre/lib/$arch/libnpjp2.so ~/.mozilla/plugins/
+    else
+        ln -sf /usr/lib/jvm/$jname/lib/$arch/libnpjp2.so ~/.mozilla/plugins/
+    fi
+    (( $? == 0)) && echo "
     ***Managed mozilla plugin successfully***" ||
     echo "
     ---Failed to manage mozilla plugin. If you think it's necessary run 
-    ln -sf /usr/lib/jvm/$jdkname/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/
+    ln -sf /usr/lib/jvm/$jname/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/
     manually, otherwise ignore."
-    #The above 4 lines is optional (needed for mozilla firefox)
     printf "%s\n" "
     *********************Installaion Finished*********************
     ***************Showing Java version information***************
