@@ -3,7 +3,7 @@ BASEDIR="$(dirname "$BASH_SOURCE")"
 cd "$BASEDIR"
 
 project="oraji"
-version="4.0.0"
+version="4.0.1"
 author="Md. Jahidul Hamid"
 source="https://github.com/neurobin/$project"
 bug_report="$source/issues"
@@ -205,8 +205,8 @@ jpath="$1"
 
 ##Validate jpath
 
-[[ ! $jpath =~ .*(jdk|jre).*\.tar\..* ]] && { echo "Doesn't seem to be a valid archive: $jpath";exit 2;}
-[[ -d $jpath ]] && { echo "You must pass an an archive file, not a directory";exit 2; }
+[[ ! $jpath =~ .*(jdk|jre).*\.tar\..* ]] && { echo "Failed to recognize archive: $jpath";exit 2;}
+[[ -d $jpath ]] && { echo "You must pass an archive file, not a directory";exit 2; }
 [[ ! -f $jpath ]] && { echo "No such file: $jpath";exit 2;}
 
 tmpdir="$(mktemp -d)"
@@ -220,7 +220,11 @@ patt="^(jdk|jre).*"
 jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
 
 [[ $jname != "" && $tmpdir != "" ]] || 
-{ echo "-----Variable can not be empty-----"; exit 4; }
+{ echo "
+-----Variable can not be empty-----
+Please file a bug report with all available terminal output and info at:
+$bug_report
+"; exit 4; }
 
 mkdir -p /usr/lib/jvm/$jname
 mv -f ./* -t /usr/lib/jvm/$jname
