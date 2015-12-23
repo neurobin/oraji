@@ -1,5 +1,5 @@
-OracleJDKInstaller
-==================
+Oracle Java Installer
+====================
 
 Oracle java (jdk and/or jre) installler script for linux. It simplifies the installation of Oracle java (jdk and/or jre) from a [download](http://www.oracle.com/technetwork/java/javase/downloads/index.html)ed source (tar.gz). It also maintains consistency among multiple versions of java (jdk and/or jre) installed with this script.
 
