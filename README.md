@@ -25,7 +25,7 @@ sudo oraji /path/to/the/java/archive
 That's it. Now if you want to populate JAVA_HOME and other environment variables run `source /etc/profile` or logout and login.
 
 
-Java Uininstallation Instruction:
+Java Uninstallation Instruction:
 ============================
 
 1. Run `oraji -u` (or `path/to/oraji -u` if you didn't install the *oraji* script).
