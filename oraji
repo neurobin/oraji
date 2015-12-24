@@ -159,28 +159,28 @@ expandPath() {
   : "${pathElements[@]}"
   for path in "${pathElements[@]}"; do
     : "$path"
-    case $path in
+    case "$path" in
       "~+"/*)
-        path=$PWD/${path#"~+/"}
+        path="$PWD/${path#"~+/"}"
         ;;
       "~-"/*)
-        path=$OLDPWD/${path#"~-/"}
+        path="$OLDPWD/${path#"~-/"}"
         ;;
       "~"/*)
-        path=$HOME/${path#"~/"}
+        path="$HOME/${path#"~/"}"
         ;;
       "~"*)
         old="$path"
-        username=${path%%/*}
-        username=${username#"~"}
+        username="${path%%/*}"
+        username="${username#"~"}"
         if [ x"$username" = x ];then
-            path=$HOME
+            path="$HOME"
         else
             IFS=: read _ _ _ _ _ homedir _ < <(getent passwd "$username")
             if [[ $path = */* ]]; then
-              path=${homedir}/${path#*/}
+              path="${homedir}/${path#*/}"
             else
-              path=$homedir
+              path="$homedir"
             fi
             if [ x"$path" = x ]; then
                 path="$old"
