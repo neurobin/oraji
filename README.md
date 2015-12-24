@@ -18,9 +18,9 @@ Java Installation Instruction:
 Run in terminal:
 
 ```sh
-sudo oraji '/path/to/the/jdk_or_jre_archive'
+sudo oraji "/path/to/the/jdk_or_jre_archive"
 ```
-(or run `sudo /path/to/oraji /path/to/the/java/archive` after giving the *oraji* script execution permission if you didn't install the script).
+(or run `sudo /path/to/oraji /path/to/the/jdk_or_jre_archive` after giving the *oraji* script execution permission if you didn't install the script).
 
 That's it. Now if you want to populate JAVA_HOME and other environment variables run `source /etc/profile` or logout and login.
 
