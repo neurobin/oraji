@@ -329,7 +329,8 @@ if echo "$(java -version 2>&1)" |grep -qsi "java version.*$jv" ; then
     ***Managed mozilla plugin successfully***" ||
     echo "
     ---Failed to manage mozilla plugin. If you think it's necessary run 
-    ln -sf /usr/lib/jvm/$jname/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/
+    ln -sf /usr/lib/jvm/$jname/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/  #For jdk and
+    ln -sf /usr/lib/jvm/$jname/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/      #For jre
     manually, otherwise ignore."
     printf "%s\n" "
     *********************Installaion Finished*********************
