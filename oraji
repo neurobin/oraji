@@ -1,7 +1,4 @@
 #!/bin/bash
-BASEDIR="$(dirname "$BASH_SOURCE")"
-cd "$BASEDIR"
-
 project="oraji"
 version="4.0.1"
 author="Md. Jahidul Hamid"
