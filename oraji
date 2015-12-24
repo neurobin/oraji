@@ -39,7 +39,7 @@ uninstall(){
     [[ $jname == "" ]] && 
     {
     if update-alternatives --display java >/dev/null 2>&1;then
-        jname=$(update-alternatives --display  java |grep -oE 'points\s*to\s*/usr/lib/jvm/[^/]*')
+        jname="$(update-alternatives --display  java |grep -oE 'points\s*to\s*/usr/lib/jvm/[^/]*')"
         jname="${jname##*/}"
         patt="^(jdk|jre).*"
         [[ $jname =~ $patt ]]
@@ -50,7 +50,7 @@ uninstall(){
     fi
     }
     
-    [[ -d /usr/lib/jvm/$jname ]] || 
+    [[ -d /usr/lib/jvm/"$jname" ]] || 
     { 
     printf "%s\n" "
     -----Directory not found: /usr/lib/jvm/$jname-----
@@ -60,13 +60,14 @@ uninstall(){
     
     [[ $jname == "" || $jname =~ \/ ]] && echo "
     ------java name can not be empty or contain /------" && exit 4
+    ##variable jname is safe to use now.
     
     patt="^(jdk|jre).*"
     [[ $jname =~ $patt ]] || { echo "
     ------Couldn't recognize java name/version------";exit 5; }
     jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
     doing=false;
-    for prog in /usr/lib/jvm/$jname/bin/*;do
+    for prog in /usr/lib/jvm/"$jname"/bin/*;do
         progn="${prog##*/}"
         [[ $progn == *"."* ]] && continue
         if [[ -f $prog ]];then
@@ -125,7 +126,7 @@ uninstall(){
         else 
             arch=i386  ## detect arch
         fi
-        jname=$(update-alternatives --display  java |grep -oE 'points\s*to\s*/usr/lib/jvm/[^/]*')
+        jname="$(update-alternatives --display  java |grep -oE 'points\s*to\s*/usr/lib/jvm/[^/]*')"
         jname="${jname##*/}"
         patt="^(jdk|jre).*"
         [[ $jname =~ $patt ]]
@@ -211,30 +212,30 @@ jpath="$1"
 
 tmpdir="$(mktemp -d)"
 
-tar -xvf $jpath -C "$tmpdir" || { echo "Failed to extract archive"; exit 2; }
+tar -xvf "$jpath" -C "$tmpdir" || { echo "Failed to extract archive"; exit 2; }
 
-cd $tmpdir/j* || { echo "Couldn't find java directory"; exit 3; }
-jname=${PWD##*/}
+cd "$tmpdir"/j* || { echo "Couldn't find java directory"; exit 3; }
+jname="${PWD##*/}"
 patt="^(jdk|jre).*"
 [[ $jname =~ $patt ]]
 jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
 
 [[ $jname != "" && $tmpdir != "" ]] || 
 { echo "
------Variable can not be empty-----
+-----Variable jname/tmpdir can not be empty-----
 Please file a bug report with all available terminal output and info at:
 $bug_report
 "; exit 4; }
 
-mkdir -p /usr/lib/jvm/$jname
-mv -f ./* -t /usr/lib/jvm/$jname
+mkdir -p /usr/lib/jvm/"$jname"
+mv -f ./* -t /usr/lib/jvm/"$jname"
 
 pr=22222  ## priority
 
 if update-alternatives --display java >/dev/null 2>&1;then
-    oldIFS=$IFS
+    oldIFS="$IFS"
     IFS=$'\n' arr=($(update-alternatives --display java |grep -oE 'priority\s+[0-9]+' |grep -oE '[0-9]+' |sort -u))
-    IFS=$oldIFS
+    IFS="$oldIFS"
     ## Find an upper priority
     max=0
     for n in "${arr[@]}" ; do
@@ -244,7 +245,7 @@ if update-alternatives --display java >/dev/null 2>&1;then
     ((pr<=max)) && pr=$((max+1))
 fi
 
-for prog in /usr/lib/jvm/$jname/bin/*;do
+for prog in /usr/lib/jvm/"$jname"/bin/*;do
     progn="${prog##*/}"
     [[ $progn == *"."* ]] && continue
     if [[ -f $prog ]];then
@@ -254,8 +255,8 @@ for prog in /usr/lib/jvm/$jname/bin/*;do
     fi
 done
 
-chown -R root:root /usr/lib/jvm/$jname
-[[ $tmpdir != "" ]] &&  rm -rf $tmpdir
+chown -R root:root /usr/lib/jvm/"$jname"
+[[ $tmpdir != "" ]] &&  rm -rf "$tmpdir"
 
 # /etc/init.d/apparmor restart  # not needed
 
@@ -269,10 +270,8 @@ else
     arch=i386  ## detect arch
 fi
 
-jv=${jname/#jre/}
-jv=${jv/#jdk/}  ##extracting java version from jname
-
-echo $jv
+jv="${jname/#jre/}"
+jv="${jv/#jdk/}"  ##extracting java version from jname
 
 if echo "$(java -version 2>&1)" |grep -qsi "java version.*$jv" ; then
 
@@ -321,9 +320,9 @@ if echo "$(java -version 2>&1)" |grep -qsi "java version.*$jv" ; then
     ...Managing mozilla plugin..."
     mkdir -p ~/.mozilla/plugins
     if [[ $jgenre == "jdk" ]];then
-        ln -sf /usr/lib/jvm/$jname/jre/lib/$arch/libnpjp2.so ~/.mozilla/plugins/
+        ln -sf /usr/lib/jvm/"$jname"/jre/lib/"$arch"/libnpjp2.so ~/.mozilla/plugins/
     else
-        ln -sf /usr/lib/jvm/$jname/lib/$arch/libnpjp2.so ~/.mozilla/plugins/
+        ln -sf /usr/lib/jvm/"$jname"/lib/"$arch"/libnpjp2.so ~/.mozilla/plugins/
     fi
     (( $? == 0)) && echo "
     ***Managed mozilla plugin successfully***" ||
