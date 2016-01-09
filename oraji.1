@@ -1,0 +1,51 @@
+.TH  oraji 1  "Jan 09, 2016" "Unix" "Utility"
+.UC 4
+
+.SH "NAME"
+oraji - Oracle Java Installer
+.SH "SYNOPSIS"
+.B oraji
+.I path/to/the/jdk_or_jre_archive
+.IP "oraji [-u, -v]"
+.SH DESCRIPTION
+Oracle Java (jdk/jre) installler script for Linux. It simplifies the installation of Oracle Java from a downloaded source (tar.gz). It also maintains consistency among multiple versions of Java (jdk/jre) installed with this script. Uninstalling any Java version installed with this script will fall back to the next most recently installed (with this script) version of Java.
+
+.SH USAGE
+Install Java:
+.RS
+Run
+.B "sudo oraji '/path/to/the/jdk_or_jre_archive'"
+to install Java from the archive.
+.RE
+Uninstall Java:
+.RS
+Run
+.B oraji -u
+and confirm the version.
+.RE
+
+.SH OPTIONS
+.IP -u
+Uninstalls Java installed with oraji. An extra argument can be passed with this option as version, but don't do that unless you know what you are doing; just use 
+.B oraji -u
+and confirm the version, it's safe.
+.IP -v
+shows the version number.
+
+.SH LINKS
+BUGREPORT
+.RS
+https://github.com/neurobin/oraji/issues
+.RE
+SOURCE
+.RS
+https://github.com/neurobin/oraji
+.RE
+.SH AUTHOR
+Md. Jahidul Hamid
+
+@Github: https://github.com/neurobin
+
+Email username: jahidulhamid
+
+Email domain: yahoo.com
