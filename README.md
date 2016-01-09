@@ -35,8 +35,9 @@ Java Uninstallation Instruction:
 
 **Note:**
 
-1. The java version points to the jdk/jre install directory: `/usr/lib/jvm/jdk|jre<version_number>` and comprises with both the *jdk/jre* part and the *version_number* part. You shouldn't run `oraji -u version` (with a version argument) unless you are sure of it. Simply run `oraji -u` and let oraji detect the version for you.
-2. After uninstalling with this script, if Java falls back to another Java version then JAVA_HOME and other environment variables **will** be updated accordingly (you will need to run `source /etc/profile` manually to populate them immediately),  mozilla plugin will be restored to the fallback java.
+1. The java version points to the jdk/jre install directory: `/usr/lib/jvm/jdk|jre<version_number>` and comprises with both the *jdk/jre* part and the *version_number* part.
+2. You shouldn't run `oraji -u version` (with a version argument) unless you are sure of it. Simply run `oraji -u` and let oraji detect the version for you.
+3. After uninstalling with this script, if Java falls back to another Java version then JAVA_HOME and other environment variables **will** be updated accordingly (you will need to run `source /etc/profile` manually to populate them immediately),  mozilla plugin will be restored to the fallback java.
 
 **N.B:** The uninstallation method is only for the oracle java installed with the `oraji` script. It deletes the `/usr/lib/jvm/jdk|jre<version_number>` directory and all exports and environment variables that was included in */etc/profile* by oraji and the mozilla plugin. If a fall back java is available, exports and environment variables will be available for this java version and mozilla plugin will be restored.
 
