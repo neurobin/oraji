@@ -77,6 +77,7 @@ Java Uninstallation Instruction:
 
 1. Improved environment variable management for multiple java version.
 2. Minor bug fix.
+3. Manual added. Can be accessed with `man oraji`.
 
 Tested OS:
 =============
