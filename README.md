@@ -72,6 +72,11 @@ Java Uninstallation Instruction:
 2. tilde (~) expansion supported in input prompt.
 3. Minor bug fix
 
+###`4.0.2`: <span class="light-quote">Sat Jan  9 16:16:23 UTC 2016</span>
+
+1. Improved environment variable management for multiple java version.
+2. Minor bug fix.
+
 Tested OS:
 =============
 
