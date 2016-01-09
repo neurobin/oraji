@@ -42,13 +42,13 @@ Java Uninstallation Instruction:
 
 #ChangeLog:
 
-###`3.0`: <span class="light-quote">Tue Dec 22 19:32:07 UTC 2015</span>
+###`3.0.0`: <span class="light-quote">Tue Dec 22 19:32:07 UTC 2015</span>
 
 1. Improved portability.
 2. Lot's of bug fixed.
 3. Comprehensive install of java which makes it usable for java developers.
 
-###`3.1`: <span class="light-quote">Tue Dec 22 20:58:42 UTC 2015</span>
+###`3.0.1`: <span class="light-quote">Tue Dec 22 20:58:42 UTC 2015</span>
 
 1. Added some extra environment variables besides JAVA_HOME.
 2. Updated PATH environment variables with some new paths.
