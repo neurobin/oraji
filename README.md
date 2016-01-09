@@ -11,6 +11,13 @@ Give the <span class="light-quote">install.sh</span> file execution permission a
 ```sh
 sudo ./install.sh
 ```
+**On Ubuntu:**
+
+```sh
+sudo add-apt-repository -y ppa:neurobin/ppa
+sudo apt-get update
+sudo apt-get install oraji
+```
 
 Java Installation Instruction:
 =============================
