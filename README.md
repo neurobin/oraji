@@ -1,12 +1,12 @@
 Oracle Java Installer
 ====================
 
-Oracle java (jdk/jre) installler script for linux. It simplifies the installation of Oracle java from a [download](http://www.oracle.com/technetwork/java/javase/downloads/index.html)ed source (tar.gz). It also maintains consistency among multiple versions of java (jdk/jre) installed with this script. Uninstalling any java version installed with this script will fall back to the next most recently installed (with this script) version of java.
+Oracle java (jdk/jre) installler script for linux. It simplifies the installation of Oracle java from a [download](http://www.oracle.com/technetwork/java/javase/downloads/index.html)ed source (tar.gz). It also maintains consistency among multiple versions of java (jdk/jre). Uninstalling any java version installed with this script will fall back to the next most recently installed version of java.
 
 Install oraji:
 =====================
 
-Give the <span class="light-quote">install.sh</span> file execution permission and run it in terminal (with root privillege).
+Give the <span class="light-quote">install.sh</span> file execution permission and run it in terminal (with root privilege).
 
 ```sh
 sudo ./install.sh
@@ -36,9 +36,8 @@ Java Uninstallation Instruction:
 ============================
 
 1. Run `oraji -u` (or `path/to/oraji -u` if you didn't install the *oraji* script).
-2. It will ask for java version. An auto detected version is provided as suggestion. If that is correct, just hit <kbd>Enter</kbd> without making any changes.
-3. Otherwise if the java version provided by default isn't correct (this shouldn't happen), provide manually and then hit <kbd>Enter</kbd>.
-4. The version can be provided as command line argument too i.e `oraji -u version` (or `/path/to/oraji -u version` if you didn't install the script).
+2. Choose the version to be uninstalled from the list.
+3. The version can be provided as command line argument too i.e `oraji -u version` (or `/path/to/oraji -u version` if you didn't install the script).
 
 **Note:**
 
@@ -48,20 +47,58 @@ Java Uninstallation Instruction:
 
 **N.B:** The uninstallation method is only for the oracle java installed with the `oraji` script. It deletes the `/usr/lib/jvm/jdk|jre<version_number>` directory and all exports and environment variables that was included in */etc/profile* by oraji and the mozilla plugin. If a fall back java is available, exports and environment variables will be available for this java version and mozilla plugin will be restored.
 
+
+Manage multiple Java versions:
+===========================
+You can install multiple Java versions and set whichever version you want as your current Java.
+
+To check which version of Java is currently active (with all other available Java versions) run:
+
+```sh
+oraji -c
+```
+
+To activate a Java version, run:
+
+```sh
+sudo oraji -s
+```
+and select the version from the list.
+
+
+Options:
+=======
+
+Option | Alt. Option | Details
+---- | ------ | -----
+`-v` | `--version`    | Show version
+`-h` | `--help`       | Show help
+`-i` | `--install`    | Install from a archive path
+`-u` | `--uninstall`  | Uninstall java
+`-s` | `--set`        | Set a java version
+`-c` | `--check`      | Show the installed java versions
+
+
 #ChangeLog:
 
-###`3.0.0`: <span class="light-quote">Tue Dec 22 19:32:07 UTC 2015</span>
+###`4.1.0`: <span class="light-quote">Tue Aug 23 23:38:01 UTC 2016</span>
 
-1. Improved portability.
-2. Lot's of bug fixed.
-3. Comprehensive install of java which makes it usable for java developers.
+1. `-s` option to activate an installed Java version
+2. `-c` option to check installed Java version
+3. `-h` option for help
+4. `-i` option for an alternative to provide archive path
 
-###`3.0.1`: <span class="light-quote">Tue Dec 22 20:58:42 UTC 2015</span>
+###`4.0.2`: <span class="light-quote">Sat Jan  9 16:16:23 UTC 2016</span>
 
-1. Added some extra environment variables besides JAVA_HOME.
-2. Updated PATH environment variables with some new paths.
-3. JAVA_HOME is no longer deleted by uninstall script.
-4. Multiple java version management.
+1. Improved environment variable management for multiple java version.
+2. Minor bug fix.
+3. Manual added. Can be accessed with `man oraji`.
+
+###`4.0.1`: <span class="light-quote">Wed Dec 23 04:34:25 UTC 2015</span>
+
+1. Input prompt improved.
+2. tilde (~) expansion supported in input prompt.
+3. Minor bug fix
 
 ###`4.0.0`: <span class="light-quote">Tue Dec 22 23:37:16 UTC 2015</span>
 
@@ -74,17 +111,18 @@ Java Uninstallation Instruction:
 6. `oraji -u` to uninstall java.
 7. Internal multiple java version management.
 
-###`4.0.1`: <span class="light-quote">Wed Dec 23 04:34:25 UTC 2015</span>
+###`3.0.1`: <span class="light-quote">Tue Dec 22 20:58:42 UTC 2015</span>
 
-1. Input prompt improved.
-2. tilde (~) expansion supported in input prompt.
-3. Minor bug fix
+1. Added some extra environment variables besides JAVA_HOME.
+2. Updated PATH environment variables with some new paths.
+3. JAVA_HOME is no longer deleted by uninstall script.
+4. Multiple java version management.
 
-###`4.0.2`: <span class="light-quote">Sat Jan  9 16:16:23 UTC 2016</span>
+###`3.0.0`: <span class="light-quote">Tue Dec 22 19:32:07 UTC 2015</span>
 
-1. Improved environment variable management for multiple java version.
-2. Minor bug fix.
-3. Manual added. Can be accessed with `man oraji`.
+1. Improved portability.
+2. Lot's of bug fixed.
+3. Comprehensive install of java which makes it usable for java developers.
 
 Tested OS:
 =============

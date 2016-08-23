@@ -6,7 +6,7 @@ oraji - Oracle Java Installer
 .SH "SYNOPSIS"
 .B oraji
 .I path/to/the/jdk_or_jre_archive
-.IP "oraji [-u, -v]"
+.IP "oraji [-i, -u, -c, -s, -h, -v]"
 .SH DESCRIPTION
 Oracle Java (jdk/jre) installler script for Linux. It simplifies the installation of Oracle Java from a downloaded source (tar.gz). It also maintains consistency among multiple versions of Java (jdk/jre) installed with this script. Uninstalling any Java version installed with this script will fall back to the next most recently installed (with this script) version of Java.
 
@@ -32,9 +32,11 @@ Uninstalls Java installed with oraji. An extra argument can be passed with this 
 .B oraji -u
 and confirm the version, it's safe.
 .IP "-s, --set"
-Takes a second parameter as java version in the form: jdk|jre<version_number> (e.g jdk1.8.0_92) and sets this version of java as the active one.
+Takes an optional second parameter as java version in the form: jdk|jre<version_number> (e.g jdk1.8.0_92) and sets this version of java as the active one. If the second parameter is not given, a selection menu will be presented.
+.IP "-c, --check"
+Display the available java versions as well as the currently active one.
 .IP "-v, --version"
-shows the version number.
+Shows version info.
 .IP "-h, --help"
 Show help
 
