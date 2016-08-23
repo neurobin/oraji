@@ -1,50 +1,30 @@
 #!/bin/bash
 project="oraji"
-version="4.1.0"
+version="4.0.2"
 author="Md. Jahidul Hamid"
 source="https://github.com/neurobin/$project"
 bug_report="$source/issues"
 version_info="
-**************** $project ****************
+********************** $project **********************
 Version    : $version
 Author     : $author
 Source     : $source
 Bug report : $bug_report
 "
-help="
-########################## $project ##########################
-# Usage:
-#   install java    : sudo oraji 'jdk_or_jre_archive_path'
-#   install java    : sudo oraji -i 'jdk_or_jre_archive_path'
-#   uninstall java  : sudo oraji -u jdk|jre<version_number>
-#
-# Options:
-#   [ -v, --version ]       : Show version
-#   [ -h, --help ]          : Show help
-#   [ -i, --install ]       : Install from a archive path
-#   [ -u, --uninstall ]     : Uninstall java
-#   [ -s, --set ]           : Set a java version
-###########################################################
-"
+
+[[ $1 == "-v" || $1 == "--version" ]] && { echo "$version_info";exit 0; }
 
 shopt -s extglob
 
-####################################### General functions ######################################
+if [ $EUID -ne 0 ]; then
+    echo "
+    *********This script must be run with root privilege*********
+    *******************Sorry! Abort!*****************************
+    "
+    exit 1
+fi
 
-err(){
-     echo "E: oraji: $@" >> /dev/stderr
-}
-
-
-chkroot(){
-    if [ x$EUID != x0 ]; then
-        err "
-        This script must be run with root privilege
-        *Sorry! Abort!**
-        "
-        exit 1
-    fi
-}
+####################################### Expand path function ######################################
 
 expandPath() {
   local path
@@ -88,12 +68,12 @@ expandPath() {
   printf -v result '%s:' "${resultPathElements[@]}"
   printf '%s\n' "${result%:}"
 }
-####################################### General functions end ######################################
+####################################### Expand path function ######################################
 
 ################# Path Managing functions #####################################
 disableJavaPath(){
 jpath="$1"
-pat="$( "$jpath" |sed -e 's/[^^]/[&]/g' -e 's/\^/\\^/g')"
+pat="$(echo "$jpath" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
 sed -e "s/^[[:blank:]]*export[[:blank:]]*J2SDKDIR[=]$pat/# &/" \
     -e "s/^[[:blank:]]*export[[:blank:]]*J2REDIR[=]$pat/# &/" \
     -e  "s/^[[:blank:]]*export[[:blank:]]*PATH[=]\$PATH[:]$pat/# &/" \
@@ -104,7 +84,7 @@ sed -e "s/^[[:blank:]]*export[[:blank:]]*J2SDKDIR[=]$pat/# &/" \
 
 enableJavaPath(){
 jpath="$1"
-pat="$( "$jpath" |sed -e 's/[^^]/[&]/g' -e 's/\^/\\^/g')"
+pat="$(echo "$jpath" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
 sed -e  "s/^[[:blank:]]*#[[:blank:]]*\(export[[:blank:]]*J2SDKDIR[=]$pat.*\)/\1/g" \
     -e  "s/^[[:blank:]]*#[[:blank:]]*\(export[[:blank:]]*J2REDIR[=]$pat.*\)/\1/g" \
     -e  "s/^[[:blank:]]*#[[:blank:]]*\(export[[:blank:]]*PATH[=]\$PATH[:]$pat.*\)/\1/g" \
@@ -115,8 +95,8 @@ sed -e  "s/^[[:blank:]]*#[[:blank:]]*\(export[[:blank:]]*J2SDKDIR[=]$pat.*\)/\1/
 
 deleteJavaPath(){
 jpath="$1"
-[[ ! $jpath =~ ^/usr/lib/jvm/j(dk|re).* ]] && { err "Argument to deletePath is invalid"; exit 1; }
-pat="$( "$jpath" |sed -e 's/[^^]/[&]/g' -e 's/\^/\\^/g')"
+[[ ! $jpath =~ ^/usr/lib/jvm/j(dk|re).* ]] && { echo "E: argument to deletePath is invalid"; exit 1; }
+pat="$(echo "$jpath" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
 sed -e "/^[[:blank:]]*export[[:blank:]]*J2SDKDIR[=]$pat/d" \
     -e "/^[[:blank:]]*export[[:blank:]]*J2REDIR[=]$pat/d" \
     -e  "/^[[:blank:]]*export[[:blank:]]*PATH[=]\$PATH[:]$pat/d" \
@@ -136,8 +116,8 @@ sed -e "s/^[[:blank:]]*export[[:blank:]]*PATH[=]\$PATH[:][/]usr[/]lib[/]jvm[/]j\
 
 installJavaPaths(){
     jname="$1"
-     echo "
-    updating JAVA_HOME and other environment variables"
+    echo "
+    ...updating JAVA_HOME and other environment variables..."
     # But first disable other Java environment variables
     disableOtherJavaPaths
     
@@ -153,11 +133,11 @@ installJavaPaths(){
     
     cpat="\([[:blank:]]*[#][[:blank:]]*\|[[:blank:]]*\)"
     
-    pat1="$cpat$( "$h1" |sed -e 's/[^^]/[&]/g' -e 's/\^/\\^/g')"
-    pat2="$cpat$( "$h2" |sed -e 's/[^^]/[&]/g' -e 's/\^/\\^/g')"
-    pat3="$cpat$( "$h3" |sed -e 's/[^^]/[&]/g' -e 's/\^/\\^/g')"
-    pat4="$cpat$( "$h4" |sed -e 's/[^^]/[&]/g' -e 's/\^/\\^/g')"
-    pat5="$cpat$( "$h5" |sed -e 's/[^^]/[&]/g' -e 's/\^/\\^/g')"
+    pat1="$cpat$(echo "$h1" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat2="$cpat$(echo "$h2" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat3="$cpat$(echo "$h3" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat4="$cpat$(echo "$h4" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
+    pat5="$cpat$(echo "$h5" |sed 's/[^^]/[&]/g; s/\^/\\^/g')"
     
     if [[ $jname =~ ^jdk ]];then
     
@@ -187,14 +167,14 @@ installJavaPaths(){
     fi
     (( $? == 0 )) &&
     . /etc/profile >/dev/null &&
-     "
-    environment variables updated successfully" ||
-    err "
-    Failed to update environment variables"
+    echo "
+    ***environment variables updated successfully***" ||
+    echo "
+    ---Failed to update environment variables"
 
 }
 
-################# Path Managing functions end #####################################
+################# Path Managing functions #####################################
 
 ####################################### Uninstall function ########################################
 uninstall(){
@@ -202,8 +182,8 @@ uninstall(){
     
     jname="$1"
     
-    [[ "$jname" =~ ^(jdk|jre).* || ! -d /usr/lib/jvm/"$jname" ]] && { err "
-    Invalid java name/version."; exit 2; }
+    [[ $jname =~ ^(jdk|jre).* || ! -d /usr/lib/jvm/$jname ]] && { echo "
+    ---Invalid java name/version.---"; exit 2; }
     
     [[ $jname == "" ]] && 
     {
@@ -218,19 +198,19 @@ uninstall(){
     
     [[ -d /usr/lib/jvm/"$jname" ]] || 
     { 
-    err "
-    Directory not found: /usr/lib/jvm/$jname-
+    printf "%s\n" "
+    -----Directory not found: /usr/lib/jvm/$jname-----
     "; exit 3;
     }
     
     
-    [[ $jname == "" || $jname =~ \/ ]] && err "
-    java name can not be empty or contain /" && exit 4
+    [[ $jname == "" || $jname =~ \/ ]] && echo "
+    ------java name can not be empty or contain /------" && exit 4
     ##variable jname is safe to use now.
     
     patt="^(jdk|jre).*"
-    [[ $jname =~ $patt ]] || { err "
-    Couldn't recognize java name/version";exit 5; }
+    [[ $jname =~ $patt ]] || { echo "
+    ------Couldn't recognize java name/version------";exit 5; }
     jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
     doing=false;
     for prog in /usr/lib/jvm/"$jname"/bin/*;do
@@ -243,34 +223,34 @@ uninstall(){
     done
     
     ##This rm command is perfectly safe as we checked $jname to be non-empty
-    rm -rf "/usr/lib/jvm/$jname" &&  "
-    removed: /usr/lib/jvm/$jname"
+    rm -rf "/usr/lib/jvm/$jname" && echo "
+    ***removed: /usr/lib/jvm/$jname***"
     
     ##Let's delete the environment variables for this java version
     deleteJavaPath "/usr/lib/jvm/$jname"
     
     (( $? == 0 )) &&
     source /etc/profile >/dev/null &&
-     "
-    Removed java environment variables" ||
-    err "
-    Failed to remove java environment variables"
+    echo "
+    ***Removed java environment variables***" ||
+    echo "
+    ---Failed to remove java environment variables"
     
     ##We will remove mozilla plugins for only the active java version.
     if $doing;then 
-        rm ~/.mozilla/plugins/libnpjp2.so &&  "
-    Mozilla plugin removed" ||
-        err "
-    Mozilla plugin not found (ignore this error)" # optional
+        rm ~/.mozilla/plugins/libnpjp2.so && echo "
+    ***Mozilla plugin removed***" ||
+        echo "
+    ---Mozilla plugin not found (ignore this error)---" # optional
     fi
     
-     "
-    Checking if a fall-back Java is available"
+    echo "
+    ...Checking if a fall-back Java is available..."
     ##try to restore mozilla plugin and other environment variables for fall-back java (if available)
     if update-alternatives --display java >/dev/null 2>&1;then
-         "
-    Congrats Fall-Back java found"
-        if  java -version 2>&1 |grep -qsi "64-Bit";then
+        echo "
+    ***Congrats... Fall-Back java found***"
+        if echo "$(java -version 2>&1)" |grep -qsi "64-Bit";then
             arch=amd64
         else 
             arch=i386  ## detect arch
@@ -282,128 +262,69 @@ uninstall(){
         enableJavaPath "/usr/lib/jvm/$jname"
         (( $? == 0 )) &&
         source /etc/profile >/dev/null &&
-         "
-    Environment variables restored for Fall-Back java" ||
-        err "
-    Couldn't restore environment variables for Fall-Back java"
+        echo "
+    ***Environment variables restored for Fall-Back java***" ||
+        echo "
+    ---Couldn't restore environment variables for Fall-Back java---"
         
         [[ $jname =~ ^jdk ]] && ln -sf /usr/lib/jvm/$jname/jre/lib/$arch/libnpjp2.so ~/.mozilla/plugins/ ||
         {
         [[ $jname =~ ^jre ]] && ln -sf /usr/lib/jvm/$jname/lib/$arch/libnpjp2.so ~/.mozilla/plugins/
-        } &&  "
-    Mozilla plugin restored for fall back java version" ||
-        err "
-    Couldn't restore mozilla plugin. Restore it manually if needed.
+        } && echo "
+    ***Mozilla plugin restored for fall back java version***" ||
+        echo "
+    ---Couldn't restore mozilla plugin. Restore it manually if needed.
     For jdk: ln -sf /usr/lib/jvm/jdk<version_number>/jre/lib/your_arch/libnpjp2.so ~/.mozilla/plugins/
     For jre: ln -sf /usr/lib/jvm/jre<version_number>/lib/your_arch/libnpjp2.so ~/.mozilla/plugins/"
     
-         "
+        echo "
     Fall-Back java version info:
     "
     
         cd ~ && java -version
     else
-         "
-    No Fall-Back java found"
+        echo "
+    ***No Fall-Back java found***"
     fi
     
-     "
-    Uninstall Finished"
+    echo "
+    ******Uninstall Finished******"
 }
-####################################### Uninstall function ends ########################################
+####################################### Uninstall function ########################################
 
+[[ $1 == "-u" ]] && { uninstall "$2";exit 0; }
 
-####################################### Opt parse ######################################################
-ustall=false
-ustall_jname=""
-set=false
-sname=""
-while (( $# > 0 )); do
-    case "$1" in
-        -v|--version)
-             echo "$version_info"
-            exit 0
-            ;;
-        -h|--help)
-             echo "$help"
-            exit 0
-            ;;
-        -u|--ustall)
-            $set && { err "More than one action is not permitted"; exit 1; }
-            ustall=true
-            ustall_jname="$2"
-            [[ "$jpath" != "" || "$ustall_jname" = -* ]] && { err "Invalid arg for uninstall option"; exit 1; }
-            chkroot
-            uninstall "$ustall_jname"
-            exit 0
-            shift
-            ;;
-        -s|--set)
-            $ustall && { err "More than one action is not permitted"; exit 1; }
-            set=true
-            if [[ "$2" != "" ]]; then
-                sname="$2"
-            else
-                err "Arg missing. Usage: oraji -s jdk|jre<version_number>"
-                exit 1
-            fi
-            ;;
-        -i|--install|*)
-            $ustall && { err "Can't install and uninstall at the same time, choose one."; exit 1; }
-            $set && { err "Can't set and install at the same time, choose one."; exit 1; }
-            if [[ "$1" = -i || "$1" = --install ]];then
-                [[ "$jpath" = "" ]] && jpath="$2" || { err "More than one archive path given"; exit 1; }
-                shift
-            else
-                [[ "$jpath" = "" ]] && jpath="$1" || { err "More than one archive path given"; exit 1; }
-            fi
-            [[ "$jpath" = "" ]] && { err "Archive path missing. Usage: oraji -i archive_path"; exit 1; }
-    esac
-    shift
-done
-####################################### Opt parse ######################################################
+jpath="$1"
 
-##################
-## check for root
-chkroot
+#mytty=$(tty)
 
-if ! $set; then
-    [[ $jpath == "" ]] && read -e -p "Enter the java archive path: " jpath && jpath="$(expandPath "$jpath")"
+[[ $jpath == "" ]] && read -e -p "Enter the java archive path: " jpath && jpath="$(expandPath "$jpath")"
 
-    ##Validate jpath
+##Validate jpath
 
-    [[ ! $jpath =~ .*(jdk|jre).*\.tar\..* ]] && { err "Failed to recognize archive: $jpath";exit 2;}
-    [[ -d $jpath ]] && { err "You must pass an archive file, not a directory";exit 2; }
-    [[ ! -f $jpath ]] && { err "No such file: $jpath";exit 2;}
+[[ ! $jpath =~ .*(jdk|jre).*\.tar\..* ]] && { echo "Failed to recognize archive: $jpath";exit 2;}
+[[ -d $jpath ]] && { echo "You must pass an archive file, not a directory";exit 2; }
+[[ ! -f $jpath ]] && { echo "No such file: $jpath";exit 2;}
 
-    tmpdir="$(mktemp -d)"
+tmpdir="$(mktemp -d)"
 
-    tar -xvf "$jpath" -C "$tmpdir" || { err "Failed to extract archive"; exit 2; }
+tar -xvf "$jpath" -C "$tmpdir" || { echo "Failed to extract archive"; exit 2; }
 
-    cd "$tmpdir"/j* || { err "Couldn't find java directory"; exit 3; }
-    jname="${PWD##*/}"
-
-    [[ $jname != "" && $tmpdir != "" ]] || 
-    { err "
-    -Variable jname/tmpdir can not be empty-
-    Please file a bug report with all available terminal output and info at:
-    $bug_report
-    "; exit 4; }
-
-    mkdir -p /usr/lib/jvm/"$jname"
-    mv -f ./* -t /usr/lib/jvm/"$jname"
-else
-    jname="$sname"
-fi
-#### File copied successfully
-
-while [[ "$jname" = "" ]]; do
-    read -p "Enter the java version (with jdk/jre): " jname
-done
-
+cd "$tmpdir"/j* || { echo "Couldn't find java directory"; exit 3; }
+jname="${PWD##*/}"
 patt="^(jdk|jre).*"
-[[ $jname =~ $patt ]] || { err "Couldn't recognize java name/version";exit 5; }
+[[ $jname =~ $patt ]]
 jgenre="${BASH_REMATCH[1]}"   ## whether it's jdk or jre
+
+[[ $jname != "" && $tmpdir != "" ]] || 
+{ echo "
+-----Variable jname/tmpdir can not be empty-----
+Please file a bug report with all available terminal output and info at:
+$bug_report
+"; exit 4; }
+
+mkdir -p /usr/lib/jvm/"$jname"
+mv -f ./* -t /usr/lib/jvm/"$jname"
 
 pr=22222  ## priority
 
@@ -440,7 +361,7 @@ chown -R root:root /usr/lib/jvm/"$jname"
 
 cd ~ # needed to run java -version
 
-if  java -version 2>&1 |grep -qsi "64-Bit";then
+if echo "$(java -version 2>&1)" |grep -qsi "64-Bit";then
     arch=amd64
 else 
     arch=i386  ## detect arch
@@ -449,35 +370,35 @@ fi
 jv="${jname/#jre/}"
 jv="${jv/#jdk/}"  ##extracting java version from jname
 
-if  java -version 2>&1 |grep -qsi "java version.*$jv" ; then
+if echo "$(java -version 2>&1)" |grep -qsi "java version.*$jv" ; then
     ##Install new paths
     installJavaPaths "$jname"
 
-     "
-    Managing mozilla plugin"
+    echo "
+    ...Managing mozilla plugin..."
     mkdir -p ~/.mozilla/plugins
     if [[ $jgenre == "jdk" ]];then
         ln -sf /usr/lib/jvm/"$jname"/jre/lib/"$arch"/libnpjp2.so ~/.mozilla/plugins/
     else
         ln -sf /usr/lib/jvm/"$jname"/lib/"$arch"/libnpjp2.so ~/.mozilla/plugins/
     fi
-    (( $? == 0)) &&  "
-    Managed mozilla plugin successfully" ||
-     "
-    Failed to manage mozilla plugin. If you think it's necessary run 
+    (( $? == 0)) && echo "
+    ***Managed mozilla plugin successfully***" ||
+    echo "
+    ---Failed to manage mozilla plugin. If you think it's necessary run 
     ln -sf /usr/lib/jvm/$jname/jre/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/  #For jdk and
     ln -sf /usr/lib/jvm/$jname/lib/your-system-architecture-here/libnpjp2.so ~/.mozilla/plugins/      #For jre
     manually, otherwise ignore."
-     "
-    Installaion Finished
-    Showing Java version information
+    echo "
+    *********************Installaion Finished*********************
+    ***************Showing Java version information***************
     "
     java -version
     printf "%s\n" "
-    *See if everything is OK**
+    *******************See if everything is OK********************
     (To populate environment variables immediately run 'source /etc/profile' manually)
     "
 else
-     "-Failed to install java. Run 'java -version' manually to confirm."
+    echo "-----Failed to install java. Run 'java -version' manually to confirm.----"
 fi
 
