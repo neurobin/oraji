@@ -25,12 +25,18 @@ and confirm the version.
 .RE
 
 .SH OPTIONS
-.IP -u
+.IP "-i, --install"
+Takes a second parameter as path to jdk or jre archive and installs java.
+.IP "-u, --uninstall"
 Uninstalls Java installed with oraji. An extra argument can be passed with this option as version, but don't do that unless you know what you are doing; just use 
 .B oraji -u
 and confirm the version, it's safe.
-.IP -v
+.IP "-s, --set"
+Takes a second parameter as java version in the form: jdk|jre<version_number> (e.g jdk1.8.0_92) and sets this version of java as the active one.
+.IP "-v, --version"
 shows the version number.
+.IP "-h, --help"
+Show help
 
 .SH LINKS
 BUGREPORT
