@@ -66,7 +66,7 @@ Option | Alt. Option | Details
 ---- | ------ | -----
 `-v` | `--version`    | Show version
 `-h` | `--help`       | Show help
-`-i` | `--install`    | Install from a archive path
+`-i` | `--install`    | Install from an archive path
 `-u` | `--uninstall`  | Uninstall java
 `-s` | `--set`        | Set a java version
 `-c` | `--check`      | Show the installed java versions
