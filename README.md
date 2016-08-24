@@ -50,20 +50,13 @@ Java Uninstallation Instruction:
 
 Manage multiple Java versions:
 ===========================
+
+**Switching between Java versions was never easier**
+
 You can install multiple Java versions and set whichever version you want as your current Java.
 
-To check which version of Java is currently active (with all other available Java versions) run:
-
-```sh
-oraji -c
-```
-
-To activate a Java version, run:
-
-```sh
-sudo oraji -s
-```
-and select the version from the list.
+1. To check which version of Java is currently active (with all other available Java versions) run `oraji -c`
+2. To activate a Java version, run `sudo oraji -s` and select the version from the list.
 
 
 Options:
